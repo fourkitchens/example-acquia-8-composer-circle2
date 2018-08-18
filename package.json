@@ -1,0 +1,8 @@
+{
+  "name": "circleci2-acquia-d8",
+  "version": "0.0.1",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^5.4.0"
+  }
+}
