@@ -45,6 +45,7 @@
         "files": ["load.environment.php"]
     },
     "scripts": {
+        "drupal-scaffold": "DrupalComposer\\DrupalScaffold\\Plugin::scaffold",
         "pre-install-cmd": [
             "DrupalProject\\composer\\ScriptHandler::checkComposerVersion"
         ],
@@ -57,8 +58,13 @@
         "post-update-cmd": [
             "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
         ],
-        "lint": "find docroot/modubles/custom docroot/themes/custom -name '*.php' -exec php -l {} \\;",
-        "code-sniff": "phpcs"
+        "lint": [
+            "./node_modules/.bin/eslint ./",
+            "find docroot/modules/custom docroot/themes/custom -name '*.php' -exec php -l {} \\;"
+        ],
+        "code-sniff": [
+            "phpcs"
+        ]
     },
     "extra": {
         "patchLevel": {
