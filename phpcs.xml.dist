@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Drupal Project">
+  <arg name="extensions" value="inc,info,install,module,php,profile,test,theme" />
+  <file>./docroot/modules</file>
+  <file>./docroot/themes</file>
+  <file>./docroot/profiles</file>
+  <exclude-pattern>vendor</exclude-pattern>
+  <exclude-pattern>contrib</exclude-pattern>
+  <exclude-pattern>tests</exclude-pattern>
+  <rule ref="./vendor/drupal/coder/coder_sniffer/Drupal" />
+</ruleset>

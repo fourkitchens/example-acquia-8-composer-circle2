@@ -27,6 +27,7 @@
         "webmozart/path-util": "^2.3"
     },
     "require-dev": {
+        "drupal/coder": "^8.2",
         "webflo/drupal-core-require-dev": "~8.5.3"
     },
     "conflict": {
@@ -55,7 +56,9 @@
         ],
         "post-update-cmd": [
             "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
-        ]
+        ],
+        "lint": "find docroot/modubles/custom docroot/themes/custom -name '*.php' -exec php -l {} \\;",
+        "code-sniff": "phpcs"
     },
     "extra": {
         "patchLevel": {
