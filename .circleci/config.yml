@@ -1,0 +1,42 @@
+version: 2
+defaults: &defaults
+  docker:
+    - image: fourkitchens/ubuntu-1604-php71-node8-apache:0.0.1
+  working_directory: ~/project
+
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: npm install
+      - run: composer install
+      - run: composer lint
+      - run: echo "Bulding Assets"
+      - run: cp .circleci/settings.local.php ./docroot/sites/default/settings.local.php
+      - run: echo "Get the Database Backup for Testing"
+      - run: echo "Import Database"
+      - run: echo "Run Build Scripts"
+      - run: echo "Run Tests"
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - linting
+      - build
+  build-deploy:
+    jobs:
+      - linting
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+                - /release-.*/
+
+
