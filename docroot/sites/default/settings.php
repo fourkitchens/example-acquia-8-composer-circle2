@@ -251,7 +251,9 @@ $databases = array();
  *   );
  * @endcode
  */
-$config_directories = array();
+$config_directories = array(
+  CONFIG_SYNC_DIRECTORY => DRUPAL_ROOT . "/../config/default",
+);
 
 /**
  * Settings:
@@ -781,11 +783,6 @@ $settings['entity_update_batch_size'] = 50;
  *
  * Keep this code block at the end of this file to take full effect.
  */
-#
-# if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
-#   include $app_root . '/' . $site_path . '/settings.local.php';
-# }
-
 
 // On Acquia Cloud, this include file configures Drupal to use the correct
 // database in each site environment (Dev, Stage, or Prod). To use this
@@ -794,3 +791,7 @@ $settings['entity_update_batch_size'] = 50;
 if (file_exists('/var/www/site-php')) {
   require('/var/www/site-php/circleci2/circleci2-settings.inc');
 }
+
+ if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
+   include $app_root . '/' . $site_path . '/settings.local.php';
+ }
