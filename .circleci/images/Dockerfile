@@ -100,6 +100,8 @@ RUN chown -R www-data:www-data /root/project/docroot && \
   a2ensite project && \
   rm -R /root/project
 
+RUN echo '127.0.0.1       project.local' >> /etc/hosts
+
 # Set up Mysql.
 RUN sudo service mysql start && \
   mysql -e "CREATE DATABASE IF NOT EXISTS project" && \

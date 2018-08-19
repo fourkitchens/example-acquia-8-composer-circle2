@@ -1,7 +1,40 @@
+# Required environmental variables should be set via the CircleCI web interface:
+#
+# - ACQUIA_USER
+#     Cloud API E-mail
+# - ACQUIA_TOKEN
+#     Cloud API Private key. Located in your profile under security.
+#     See: https://docs.acquia.com/acquia-cloud/api/auth
+# - ACQUIA_CANONICAL_ENV
+#     Environment to get database from. Usually "prod".
+# - ACQUIA_ENDPOINT
+#     Cloud API Endpoint. Usually "https://cloudapi.acquia.com/v1".
+# - ACQUIA_REALM
+#     Cloud API Realm. Usually "prod" or "devcloud".
+#     See: https://docs.acquia.com/acquia-cloud/api#realm
+# - ACQUIA_SITE
+#     Cloud API Site parameter.
+# - ACQUIA_REPO
+#     Acquia git repo url.
+# - ACQUIA_BOT_EMAIL
+#     Email used to commit deployment commits.
+# - ACQUIA_BOT_NAME
+#     Display name use for the deployment committer.
+
 version: 2
 defaults: &defaults
   docker:
-    - image: fourkitchens/ubuntu-1604-php71-node8-apache:0.0.1
+    - image: fourkitchens/ubuntu-1604-php71-node8-apache:0.0.3
+      environment:
+        DATE_TIMEZONE: America/Chicago
+        TERM: xterm
+        ACQUIA_CANONICAL_ENV: prod
+        ACQUIA_ENDPOINT: https://cloudapi.acquia.com/v1
+        ACQUIA_REALM: devcloud
+        ACQUIA_SITE: circleci2
+        ACQUIA_REPO: circleci2@svn-3239.devcloud.hosting.acquia.com:circleci2.git
+        ACQUIA_BOT_EMAIL: bender@fourkitchens.com
+        ACQUIA_BOT_NAME: "Bender Kitchens"
   working_directory: ~/project
 
 jobs:
@@ -11,14 +44,48 @@ jobs:
       - checkout
       - run: npm install
       - run: composer install
-      - run: composer lint
-      - run: echo "Bulding Assets"
+      - run: echo "Run linting" && composer lint
+      - run: echo "Build assets for testing" && composer build-assets
       - run: cp .circleci/settings.local.php ./docroot/sites/default/settings.local.php
-      - run: echo "Get the Database Backup for Testing"
-      - run: echo "Import Database"
-      - run: echo "Run Build Scripts"
-      - run: echo "Run Tests"
-
+      - run: echo "Get the database backup for testing"
+      - run: ./scripts/acquia/acquia-get-db-backup.sh $ACQUIA_REALM:$ACQUIA_SITE $ACQUIA_CANONICAL_ENV $ACQUIA_SITE
+      - run: echo "Import database"
+      - run: service mysql start
+      - run: drush fresh
+      - run: echo "Run build scripts"
+      - run: drush local
+      - run: echo "Run tests"
+      - run: sudo echo '127.0.0.1       project.local' >> /etc/hosts
+      - run: service apache2 start
+      - run: chown -R root:www-data ./docroot
+      - run: curl "http://project.local"
+  deploy:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: npm install
+      - run: composer install
+      - run: echo "build assets for deploying" && composer build-assets
+      - run: echo "deploying to the $circle_branch on acquia."
+      - run: git config --global user.email "$ACQUIA_BOT_EMAIL"
+      - run: git config --global user.name "$ACQUIA_BOT_NAME"
+      - run: git remote add acquia $ACQUIA_REPO
+      - run: git fetch acquia
+      - run: "sed -i '1,/######## ACQUIA IGNORE BELOW THIS LINE ########/d' .gitignore"
+      # remove any .git directories that may exist in vendor libraries* so those
+      # libraries don't get excluded from our repo. Remember kiddies somedir/*
+      # returns all files/dirs that are NOT dot (hidden). This protects our repos'
+      # .git folder from being blown away.
+      - run: find ./* -type d | grep .git | xargs rm -rf
+      # Remove unwanted gitignores here. Follow the example below.
+      # Remove simplesamlphp .gitignore which would cause our config and metadata
+      # symlinks to be ignored. If it's already not there, GREAT!
+      # - rm ./vendor/simplesamlphp/simplesamlphp/.gitignore || exit 0
+      # Commit and push to Acquia.
+      - run: git add .
+      - run: git commit -am "Built assets."
+      - run: git push acquia $CIRCLE_BRANCH -f --tags
+      - run: echo "If deployment was successful, Acquia Cloud dev/post-code-update hook will handle importing config, updating db, and clearing caches."
 workflows:
   version: 2
   commit:

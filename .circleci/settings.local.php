@@ -9,3 +9,5 @@ $databases['default']['default'] = array (
   'prefix' => '',
   'collation' => 'utf8mb4_general_ci',
 );
+
+$settings['hash_salt'] = 'something awesome';
