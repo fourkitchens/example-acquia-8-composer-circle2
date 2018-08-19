@@ -90,7 +90,6 @@ workflows:
   version: 2
   commit:
     jobs:
-      - linting
       - build
   build-deploy:
     jobs:
