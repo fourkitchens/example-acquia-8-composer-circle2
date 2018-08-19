@@ -1,0 +1,12 @@
+name: circleci-2
+recipe: drupal8
+config:
+  webroot: ./docroot
+  php: '7.1'
+
+tooling:
+  drush:
+    service: appserver
+    cmd:
+      - "drush"
+      - "--root=/app/docroot"
