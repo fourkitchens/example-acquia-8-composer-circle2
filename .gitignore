@@ -11,6 +11,10 @@
 /node_modules/
 
 ######## ACQUIA IGNORE BELOW THIS LINE ########
+
+/reference
+!/reference/.gitkeep
+
 # Ignore sensitive information
 /docroot/sites/*/settings.local.php
 
