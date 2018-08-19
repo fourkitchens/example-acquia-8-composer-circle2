@@ -63,6 +63,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - run: "[[ ! -s \"$(git rev-parse --git-dir)/shallow\" ]] || git fetch --unshallow"
       - run: npm install
       - run: composer install
       - run: echo "build assets for deploying" && composer build-assets
@@ -70,6 +71,7 @@ jobs:
       - run: git config --global user.email "$ACQUIA_BOT_EMAIL"
       - run: git config --global user.name "$ACQUIA_BOT_NAME"
       - run: git remote add acquia $ACQUIA_REPO
+      - run: ssh-keyscan -H $(echo "$ACQUIA_REPO" | sed 's/.*@\(.*\):.*/\1/') >> ~/.ssh/known_hosts
       - run: git fetch acquia
       - run: "sed -i '1,/######## ACQUIA IGNORE BELOW THIS LINE ########/d' .gitignore"
       # remove any .git directories that may exist in vendor libraries* so those
@@ -88,12 +90,8 @@ jobs:
       - run: echo "If deployment was successful, Acquia Cloud dev/post-code-update hook will handle importing config, updating db, and clearing caches."
 workflows:
   version: 2
-  commit:
-    jobs:
-      - build
   build-deploy:
     jobs:
-      - linting
       - build
       - deploy:
           requires:
