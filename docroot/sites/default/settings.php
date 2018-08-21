@@ -251,9 +251,7 @@ $databases = array();
  *   );
  * @endcode
  */
-$config_directories = array(
-  CONFIG_SYNC_DIRECTORY => DRUPAL_ROOT . "/../config/default",
-);
+$config_directories = array();
 
 /**
  * Settings:
@@ -795,3 +793,7 @@ if (file_exists('/var/www/site-php')) {
  if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
    include $app_root . '/' . $site_path . '/settings.local.php';
  }
+
+$config_directories = array(
+  CONFIG_SYNC_DIRECTORY => DRUPAL_ROOT . "/../config/default",
+);
