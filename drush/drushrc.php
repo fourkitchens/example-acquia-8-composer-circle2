@@ -30,29 +30,39 @@ $options['shell-aliases']['fresh'] = '!( ' . implode(" ) && \n ( ", [
 ]) . " )";
 
 $options['shell-aliases']['local'] = "!( " . implode(" ) && \n ( ", [
-  "echo '\nUpdating database...'",
+  "echo ''",
+  "echo 'Updating database...'",
   "drush updatedb -y",
 
-  "echo '\nRebuilding cache...'",
+  "echo ''",
+  "echo 'Rebuilding cache...'",
   "drush cache-rebuild",
 
-  "echo '\nImporting configuration...'",
+  "echo ''",
+  "echo 'Importing configuration...'",
   "drush config-import sync -y",
 
-  "echo '\nApplying pending entity schema updates...'",
+  "echo ''",
+  "echo 'Applying pending entity schema updates...'",
   "drush entity-updates -y",
 ]) . " )";
 
 $options['shell-aliases']['prod'] = "!( " . implode(" ) && \n ( ", [
-  "echo '\nUpdating database...'",
+  "echo ''",
+  "echo Deploying Prod",
+  "echo ''",
+  "echo 'Updating database...'",
   "drush updatedb -y",
 
-  "echo '\nRebuilding cache...'",
+  "echo ''",
+  "echo 'Rebuilding cache...'",
   "drush cache-rebuild",
 
-  "echo '\nImporting configuration...'",
+  "echo ''",
+  "echo 'Importing configuration...'",
   "drush config-import sync -y",
 
-  "echo '\nApplying pending entity schema updates...'",
+  "echo ''",
+  "echo 'Applying pending entity schema updates...'",
   "drush entity-updates -y",
 ]) . " )";
