@@ -27,7 +27,7 @@ repo_type="$6"
 #    See: https://docs.acquia.com/acquia-cloud/api/auth
 
 ACQUIA_ENDPOINT="https://cloudapi.acquia.com/v1"
-ACQUIA_CANONICAL_ENV="test"
+ACQUIA_CANONICAL_ENV="prod"
 # Grab Keys
 # @see https://docs.acquia.com/acquia-cloud/files/system-files/private
 source /mnt/gfs/home/$site/$target_env/nobackup/bashkeys.sh
