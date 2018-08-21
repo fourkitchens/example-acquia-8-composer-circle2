@@ -10,3 +10,4 @@ tooling:
     cmd:
       - "drush"
       - "--root=/app/docroot"
+      - "--uri=https://circleci2.lndo.site"
