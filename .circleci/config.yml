@@ -1,14 +1,7 @@
 # Required environmental variables should be set via the CircleCI web interface:
 #
-# - ACQUIA_USER
-#     Cloud API E-mail
-# - ACQUIA_TOKEN
-#     Cloud API Private key. Located in your profile under security.
-#     See: https://docs.acquia.com/acquia-cloud/api/auth
 # - ACQUIA_CANONICAL_ENV
 #     Environment to get database from. Usually "prod".
-# - ACQUIA_ENDPOINT
-#     Cloud API Endpoint. Usually "https://cloudapi.acquia.com/v1".
 # - ACQUIA_REALM
 #     Cloud API Realm. Usually "prod" or "devcloud".
 #     See: https://docs.acquia.com/acquia-cloud/api#realm
@@ -20,19 +13,23 @@
 #     Email used to commit deployment commits.
 # - ACQUIA_BOT_NAME
 #     Display name use for the deployment committer.
+# - ACQUIACLI_KEY
+#     Cloud API Private key generated when you generate a token.
+#     See: https://github.com/typhonius/acquia_cli#generating-an-api-access-token
+# - ACQUIACLI_SECRET
+#     Cloud API secret generated when you generate a token.
 
 version: 2
 defaults: &defaults
   docker:
-    - image: fourkitchens/ubuntu-1604-php71-node8-apache:0.0.3
+    - image: fourkitchens/ubuntu-1604-php72-node10-apache:latest
       environment:
         DATE_TIMEZONE: America/Chicago
         TERM: xterm
         ACQUIA_CANONICAL_ENV: prod
-        ACQUIA_ENDPOINT: https://cloudapi.acquia.com/v1
-        ACQUIA_REALM: devcloud
-        ACQUIA_SITE: circleci2
-        ACQUIA_REPO: circleci2@svn-3239.devcloud.hosting.acquia.com:circleci2.git
+        ACQUIA_REALM: prod
+        ACQUIA_SITE: sdsuextension
+        ACQUIA_REPO: sdsuextension@svn-21939.prod.hosting.acquia.com:sdsuextension.git
         ACQUIA_BOT_EMAIL: bender@fourkitchens.com
         ACQUIA_BOT_NAME: "Bender Kitchens"
   working_directory: ~/project
@@ -45,15 +42,15 @@ jobs:
       - run: npm install
       - run: composer install
       - run: echo "Run linting" && composer lint
-      - run: echo "Build assets for testing" && composer build-assets
       - run: cp .circleci/settings.local.php ./docroot/sites/default/settings.local.php
+      - run: ./scripts/custom/install-acquia-cli.sh
       - run: echo "Get the database backup for testing"
-      - run: ./scripts/acquia/acquia-get-db-backup.sh $ACQUIA_REALM:$ACQUIA_SITE $ACQUIA_CANONICAL_ENV $ACQUIA_SITE
+      - run: ./vendor/bin/acquiacli db:backup:download --progress-delay=15 -n $ACQUIA_REALM:$ACQUIA_SITE $ACQUIA_CANONICAL_ENV $ACQUIA_SITE --path="./reference" --filename="backup";
       - run: echo "Import database"
       - run: service mysql start
-      - run: drush fresh
+      - run: ./scripts/custom/fresh.sh
       - run: echo "Run build scripts"
-      - run: drush local
+      - run: ./scripts/custom/deploy.sh local
       - run: echo "Run tests"
       - run: sudo echo '127.0.0.1       project.local' >> /etc/hosts
       - run: service apache2 start
@@ -66,14 +63,17 @@ jobs:
       - run: "[[ ! -s \"$(git rev-parse --git-dir)/shallow\" ]] || git fetch --unshallow"
       - run: npm install
       - run: composer install
-      - run: echo "build assets for deploying" && composer build-assets
+      - run: ./.circleci/scripts/prepare-theme.sh
+      - run: rm ./docroot/themes/custom/sdsu/.gitignore
+      - run: ./scripts/custom/install-acquia-cli.sh
       - run: echo "deploying to the $circle_branch on acquia."
       - run: git config --global user.email "$ACQUIA_BOT_EMAIL"
       - run: git config --global user.name "$ACQUIA_BOT_NAME"
       - run: git remote add acquia $ACQUIA_REPO
       - run: ssh-keyscan -H $(echo "$ACQUIA_REPO" | sed 's/.*@\(.*\):.*/\1/') >> ~/.ssh/known_hosts
       - run: git fetch acquia
-      - run: "sed -i '1,/######## ACQUIA IGNORE BELOW THIS LINE ########/d' .gitignore"
+      # - run: "sed -i '1,/######## ACQUIA IGNORE BELOW THIS LINE ########/d' .gitignore"
+      - run: mv -f ./.gitignore-acquia ./.gitignore
       # remove any .git directories that may exist in vendor libraries* so those
       # libraries don't get excluded from our repo. Remember kiddies somedir/*
       # returns all files/dirs that are NOT dot (hidden). This protects our repos'
@@ -83,6 +83,8 @@ jobs:
       # Remove simplesamlphp .gitignore which would cause our config and metadata
       # symlinks to be ignored. If it's already not there, GREAT!
       # - rm ./vendor/simplesamlphp/simplesamlphp/.gitignore || exit 0
+      # Remove local settings
+      - run: rm -rf ./settings
       # Commit and push to Acquia.
       - run: git add .
       - run: git commit -am "Built assets."
@@ -102,5 +104,3 @@ workflows:
                 - master
                 - develop
                 - /release-.*/
-
-

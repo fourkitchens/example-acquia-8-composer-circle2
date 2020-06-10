@@ -1,12 +1,38 @@
 {
   "name": "circleci2-acquia-d8",
   "version": "0.0.1",
-  "dependencies": {},
+  "dependencies": {
+    "eslint-config-standard": "^11.0.0",
+    "shelljs": "^0.8.2"
+  },
   "devDependencies": {
-    "eslint": "^5.4.0",
-    "eslint-config-airbnb": "14.1.0",
-    "eslint-plugin-import": "2.2.0",
-    "eslint-plugin-jsx-a11y": "4.0.0",
-    "eslint-plugin-react": "6.10.3"
+    "eslint": "^4.19.1",
+    "prettier": "^1.14.2",
+    "eslint-config-airbnb": "^17.0.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-promise": "^4.0.0",
+    "eslint-plugin-react": "^7.10.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "eslint-plugin-prettier": "^2.6.2",
+    "eslint-config-prettier": "^3.0.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "setup": "node scripts/node/setup.js",
+    "build": "node scripts/node/build.js",
+    "local-env": "node scripts/node/local-env.js",
+    "refresh": "node scripts/node/refresh.js",
+    "get-db": "node scripts/node/get-db.js",
+    "get-files": "node scripts/node/get-files.js",
+    "import-db": "node scripts/node/import-db.js",
+    "confex": "node scripts/node/confex.js",
+    "confim": "node scripts/node/confim.js",
+    "lint": "node scripts/node/lint.js",
+    "lint-js": "node scripts/node/lint-js.js",
+    "lint-php": "node scripts/node/lint-php.js",
+    "eslint": "eslint ./docroot/modules/custom/** ./docroot/themes/custom/** --color",
+    "eslint-fix": "eslint ./docroot/modules/custom/** ./docroot/themes/custom/** --fix --color"
   }
 }
